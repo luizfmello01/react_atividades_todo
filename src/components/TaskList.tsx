@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import '../styles/tasklist.scss'
 
@@ -14,16 +14,41 @@ export function TaskList() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
+  function generateRandom(): number {
+    return Date.now();
+  }
+
   function handleCreateNewTask() {
     // Crie uma nova task com um id random, não permita criar caso o título seja vazio.
+    if ( newTaskTitle.replace(/( )+/, '') != '' ) {
+      let newTask: Task;
+      newTask = {
+        id: generateRandom(),
+        title: newTaskTitle,
+        isComplete: false
+      };
+
+      setTasks([...tasks, newTask]);
+      }
   }
 
   function handleToggleTaskCompletion(id: number) {
     // Altere entre `true` ou `false` o campo `isComplete` de uma task com dado ID
+    setTasks(
+      tasks.filter(task => {
+          if (task.id === id) task.isComplete = true;
+          return task;
+        })
+    );
   }
 
   function handleRemoveTask(id: number) {
     // Remova uma task da listagem pelo ID
+    setTasks(
+      tasks.filter(task => {
+          return task.id !== id;
+        })
+    );
   }
 
   return (
@@ -54,7 +79,9 @@ export function TaskList() {
                     type="checkbox"
                     readOnly
                     checked={task.isComplete}
-                    onClick={() => handleToggleTaskCompletion(task.id)}
+                    {...task.isComplete === false && 
+                      {onClick:() => handleToggleTaskCompletion(task.id)}
+                    }
                   />
                   <span className="checkmark"></span>
                 </label>
